@@ -122,7 +122,7 @@ export class Grid {
 
     // Return all words filtered by first letter and word length
     private getAllWords(firstLetter: string): Array<string> {
-        return fs.readFileSync('main/words.txt', 'utf-8').split('#').filter(word => word.length == this.wordLength && word.split('')[0] == firstLetter.toLowerCase())
+        return fs.readFileSync('main/words2.txt', 'utf-8').split('#').filter(word => word.length == this.wordLength && word.split('')[0] == firstLetter.toLowerCase())
     }
 
     // Return best word from words array (each: vowels +2, unique consonants +1 => score)
