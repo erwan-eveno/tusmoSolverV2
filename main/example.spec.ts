@@ -1,5 +1,6 @@
 import {test, expect, Locator} from '@playwright/test';
 import {Grid} from "./Grid";
+import * as fs from "fs";
 
 test.only('Main test', async({page}) => {
   // Home page
@@ -32,6 +33,7 @@ test.only('Main test', async({page}) => {
       await page.keyboard.type(newWord)
       await page.keyboard.press('Enter')
       await page.waitForTimeout(300)
+
       // Check if the word exist
       const validValue = await page.getByText('Ce mot n\'est pas dans la liste !').isVisible()
       if(validValue){
@@ -39,14 +41,28 @@ test.only('Main test', async({page}) => {
         await page.keyboard.press('Enter')
       }
       await page.waitForTimeout(300)
-      grid.logger()
-      // Check if the game is lost
-      if(await page.getByText('C\'est perdu !').isVisible()) console.log("perdu!!!!!")
+
+      // Check if the game is lost and add unknown word to word list
+      if(await page.getByText('C\'est perdu !').isVisible()) {
+        await addWord(page)
+      }
       await page.waitForTimeout(300)
     }
 
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(1000)
   }
 
   await page.pause()
 })
+
+const addWord = async (page) => {
+  const unknownWord = ((await page.locator(':text(\'Le mot était\') + div').allTextContents())[0].trim()).toLowerCase()
+  fs.appendFile('./main/addedWords.txt', `#${unknownWord}`, (err)=>{
+    if(err) throw err
+    console.log(`☑ Word ${unknownWord} correctly added to added word list!`)
+  })
+  fs.appendFile('./main/words2.txt', `#${unknownWord}`, (err)=>{
+    if(err) throw err
+    console.log(`☑ Word ${unknownWord} correctly added to actual word list!`)
+  })
+}
