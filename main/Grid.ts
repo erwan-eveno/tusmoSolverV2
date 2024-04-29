@@ -16,6 +16,8 @@ export class Grid {
     private globalBan = []
     private globalYellow = []
 
+    private lost: boolean = false
+
     constructor(gridBloc: Locator, keyboardBloc: Locator) {
         this.grid = gridBloc
         this.keyboard = keyboardBloc
@@ -37,7 +39,8 @@ export class Grid {
         return this.lastWord
     }
 
-    public async getNewWord(){
+    // Get a new filtered word
+    public async getNewWord(): Promise<string>{
         // Scrap last word
         for(let i=0; i < this.wordLength; i++){
             const letter = this.lastWord.split('')[i]
@@ -55,20 +58,25 @@ export class Grid {
         return this.lastWord
     }
 
+    // Check if the grid is win
     public async isWin(): Promise<boolean> {
+
         let buffer = 0
         for(let i=0; i < this.wordLength; i++){
             if((await this.grid.locator('.cell-content').nth(this.wordLength * this.round + i).getAttribute('class')).split(' ').splice(1,1)[0] != 'r') buffer++
         }
-        return buffer == 0
+        console.log("is win logger: ", (buffer == 0 && this.lost != true))
+        return (buffer == 0 && this.lost != true)
     }
 
-    public logger(){ //todo: DELETE
-        console.log(this.lastWord)
+    // Set the game on lost state
+    public setLost(): void{
+        this.lost = true
+        console.log("set to lost", this.lost)
     }
 
     // Check if the tested word is in the tusmo game list
-    public getValid() {
+    public getValid(): string {
         if(this.words[1] != undefined){
             this.lastWord = this.words[1]
             return this.words[1]
@@ -112,7 +120,7 @@ export class Grid {
     }
 
     // Find all banned letters from keyboard
-    private async scrapKeyboard(){
+    private async scrapKeyboard(): Promise<void>{
         const keyOrder = 'azertyuiopqsdfghjklm#wxcvbn#'
         for(let i=0; i < 28; i++){
             const key = await this.keyboard.locator('.key[data-v-6ed99f25]').nth(i).getAttribute('class')

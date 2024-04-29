@@ -11,7 +11,9 @@ test.only('Main test', async({page}) => {
 
   // Solo page
   while(true){
+    console.log("2")
     await page.waitForSelector('.motus-grid')
+    console.log("3")
     const gridBloc: Locator = await page.locator('.motus-grid').last()
     const keyboardBloc: Locator = await page.locator('.keyboard')
     const grid = new Grid(gridBloc, keyboardBloc)
@@ -26,8 +28,10 @@ test.only('Main test', async({page}) => {
       await page.keyboard.press('Enter')
     }
     await page.waitForTimeout(500)
+    console.log("4")
 
     while(!await grid.isWin()){
+      console.log("5")
       await page.waitForTimeout(300)
       const newWord = await grid.getNewWord()
       await page.keyboard.type(newWord)
@@ -45,24 +49,27 @@ test.only('Main test', async({page}) => {
       // Check if the game is lost and add unknown word to word list
       if(await page.getByText('C\'est perdu !').isVisible()) {
         await addWord(page)
+        await page.getByText('MENU').click()
+        await page.waitForTimeout(300)
+        await page.locator('text=Solo').click();
+        grid.setLost()
+        console.log("game lossssssssssssssssst")
+        await page.waitForTimeout(1000)
       }
-      await page.waitForTimeout(300)
     }
-
-    await page.waitForTimeout(1000)
+    console.log("1")
+    await page.waitForTimeout(2000)
   }
-
-  await page.pause()
 })
 
 const addWord = async (page) => {
   const unknownWord = ((await page.locator(':text(\'Le mot était\') + div').allTextContents())[0].trim()).toLowerCase()
   fs.appendFile('./main/addedWords.txt', `#${unknownWord}`, (err)=>{
     if(err) throw err
-    console.log(`☑ Word ${unknownWord} correctly added to added word list!`)
+    console.log(`☑ Word "${unknownWord}" correctly added to added word list!`)
   })
   fs.appendFile('./main/words2.txt', `#${unknownWord}`, (err)=>{
     if(err) throw err
-    console.log(`☑ Word ${unknownWord} correctly added to actual word list!`)
+    console.log(`☑ Word "${unknownWord}" correctly added to actual word list!`)
   })
 }
